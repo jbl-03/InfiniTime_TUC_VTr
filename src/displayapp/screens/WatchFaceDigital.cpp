@@ -32,58 +32,79 @@ WatchFaceDigital::WatchFaceDigital(Controllers::DateTime& dateTimeController,
     weatherService {weatherService},
     statusIcons(batteryController, bleController) {
 
-  statusIcons.Create();
+  // Create the top green bar
+  lv_obj_t* top_bar = lv_obj_create(lv_scr_act(), NULL);
+  lv_obj_set_size(top_bar, LV_HOR_RES_MAX, 30);  // Adjust the height as needed
+  lv_obj_set_style_local_bg_color(top_bar, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
+  lv_obj_set_style_local_border_width(top_bar, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 0);
+  lv_obj_align(top_bar, NULL, LV_ALIGN_IN_TOP_MID, 0, 0);
 
-  notificationIcon = lv_label_create(lv_scr_act(), nullptr);
+  // Create the bottom green bar
+  lv_obj_t* bottom_bar = lv_obj_create(lv_scr_act(), NULL);
+  lv_obj_set_size(bottom_bar, LV_HOR_RES_MAX, 30);  // Adjust the height as needed
+  lv_obj_set_style_local_bg_color(bottom_bar, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_GREEN);
+  lv_obj_set_style_local_border_width(bottom_bar, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 0);
+  lv_obj_align(bottom_bar, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+
+  // Move status icons into the top bar
+  statusIcons.Create(top_bar);  // Modify statusIcons.Create() to accept a parent object
+  statusIcons.Update();
+
+  // Create notification icon inside the top bar
+  notificationIcon = lv_label_create(top_bar, nullptr);
   lv_obj_set_style_local_text_color(notificationIcon, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_LIME);
   lv_label_set_text_static(notificationIcon, NotificationIcon::GetIcon(false));
-  lv_obj_align(notificationIcon, nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 0);
+  lv_obj_align(notificationIcon, top_bar, LV_ALIGN_IN_LEFT_MID, 5, 0);
 
-  weatherIcon = lv_label_create(lv_scr_act(), nullptr);
+  // Adjust weather icon and temperature to be inside the top bar
+  weatherIcon = lv_label_create(top_bar, nullptr);
   lv_obj_set_style_local_text_color(weatherIcon, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x999999));
   lv_obj_set_style_local_text_font(weatherIcon, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &fontawesome_weathericons);
   lv_label_set_text(weatherIcon, "");
-  lv_obj_align(weatherIcon, nullptr, LV_ALIGN_IN_TOP_MID, -20, 50);
+  lv_obj_align(weatherIcon, top_bar, LV_ALIGN_CENTER, -20, 0);
   lv_obj_set_auto_realign(weatherIcon, true);
 
-  temperature = lv_label_create(lv_scr_act(), nullptr);
+  temperature = lv_label_create(top_bar, nullptr);
   lv_obj_set_style_local_text_color(temperature, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x999999));
   lv_label_set_text(temperature, "");
-  lv_obj_align(temperature, nullptr, LV_ALIGN_IN_TOP_MID, 20, 50);
+  lv_obj_align(temperature, top_bar, LV_ALIGN_CENTER, 20, 0);
 
+  // Time and date labels remain unchanged
   label_date = lv_label_create(lv_scr_act(), nullptr);
   lv_obj_align(label_date, lv_scr_act(), LV_ALIGN_CENTER, 0, 60);
   lv_obj_set_style_local_text_color(label_date, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x999999));
 
   label_time = lv_label_create(lv_scr_act(), nullptr);
   lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
-
-  lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_IN_RIGHT_MID, 0, 0);
+  lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_CENTER, 0, 0);
 
   label_time_ampm = lv_label_create(lv_scr_act(), nullptr);
   lv_label_set_text_static(label_time_ampm, "");
   lv_obj_align(label_time_ampm, lv_scr_act(), LV_ALIGN_IN_RIGHT_MID, -30, -55);
 
-  heartbeatIcon = lv_label_create(lv_scr_act(), nullptr);
+  // Move heartbeat icon and value into the bottom bar
+  heartbeatIcon = lv_label_create(bottom_bar, nullptr);
   lv_label_set_text_static(heartbeatIcon, Symbols::heartBeat);
   lv_obj_set_style_local_text_color(heartbeatIcon, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xCE1B1B));
-  lv_obj_align(heartbeatIcon, lv_scr_act(), LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
+  lv_obj_align(heartbeatIcon, bottom_bar, LV_ALIGN_IN_LEFT_MID, 5, 0);
 
-  heartbeatValue = lv_label_create(lv_scr_act(), nullptr);
+  heartbeatValue = lv_label_create(bottom_bar, nullptr);
   lv_obj_set_style_local_text_color(heartbeatValue, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xCE1B1B));
   lv_label_set_text_static(heartbeatValue, "");
   lv_obj_align(heartbeatValue, heartbeatIcon, LV_ALIGN_OUT_RIGHT_MID, 5, 0);
 
-  stepValue = lv_label_create(lv_scr_act(), nullptr);
+  // Move step icon and value into the bottom bar
+  stepValue = lv_label_create(bottom_bar, nullptr);
   lv_obj_set_style_local_text_color(stepValue, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x00FFE7));
   lv_label_set_text_static(stepValue, "0");
-  lv_obj_align(stepValue, lv_scr_act(), LV_ALIGN_IN_BOTTOM_RIGHT, 0, 0);
+  lv_obj_align(stepValue, bottom_bar, LV_ALIGN_IN_RIGHT_MID, -5, 0);
 
-  stepIcon = lv_label_create(lv_scr_act(), nullptr);
+  stepIcon = lv_label_create(bottom_bar, nullptr);
   lv_obj_set_style_local_text_color(stepIcon, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x00FFE7));
   lv_label_set_text_static(stepIcon, Symbols::shoe);
   lv_obj_align(stepIcon, stepValue, LV_ALIGN_OUT_LEFT_MID, -5, 0);
 
+  // Create the refresh task
   taskRefresh = lv_task_create(RefreshTaskCallback, LV_DISP_DEF_REFR_PERIOD, LV_TASK_PRIO_MID, this);
   Refresh();
 }
@@ -119,7 +140,7 @@ void WatchFaceDigital::Refresh() {
       }
       lv_label_set_text(label_time_ampm, ampmChar);
       lv_label_set_text_fmt(label_time, "%2d:%02d", hour, minute);
-      lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_IN_RIGHT_MID, 0, 0);
+      lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_CENTER, 0, 0);
     } else {
       lv_label_set_text_fmt(label_time, "%02d:%02d", hour, minute);
       lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_CENTER, 0, 0);
@@ -129,21 +150,12 @@ void WatchFaceDigital::Refresh() {
     if (currentDate.IsUpdated()) {
       uint16_t year = dateTimeController.Year();
       uint8_t day = dateTimeController.Day();
-      if (settingsController.GetClockType() == Controllers::Settings::ClockType::H24) {
-        lv_label_set_text_fmt(label_date,
-                              "%s %d %s %d",
-                              dateTimeController.DayOfWeekShortToString(),
-                              day,
-                              dateTimeController.MonthShortToString(),
-                              year);
-      } else {
-        lv_label_set_text_fmt(label_date,
-                              "%s %s %d %d",
-                              dateTimeController.DayOfWeekShortToString(),
-                              dateTimeController.MonthShortToString(),
-                              day,
-                              year);
-      }
+      lv_label_set_text_fmt(label_date,
+                            "%s %d %s %d",
+                            dateTimeController.DayOfWeekShortToString(),
+                            day,
+                            dateTimeController.MonthShortToString(),
+                            year);
       lv_obj_realign(label_date);
     }
   }
