@@ -52,6 +52,7 @@ namespace Pinetime {
 
         Utility::DirtyValue<std::chrono::time_point<std::chrono::system_clock, std::chrono::days>> currentDate;
 
+        // Existing UI elements
         lv_obj_t* label_time;
         lv_obj_t* label_time_ampm;
         lv_obj_t* label_date;
@@ -62,6 +63,10 @@ namespace Pinetime {
         lv_obj_t* notificationIcon;
         lv_obj_t* weatherIcon;
         lv_obj_t* temperature;
+
+        // New UI elements for top and bottom bars
+        lv_obj_t* top_bar;       // Add this line
+        lv_obj_t* bottom_bar;    // Add this line
 
         Controllers::DateTime& dateTimeController;
         Controllers::NotificationManager& notificationManager;
